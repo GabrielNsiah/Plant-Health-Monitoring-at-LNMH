@@ -1,4 +1,4 @@
-print("DSFSDFSSDSDF")
-for i in range(2):
+print("DSFSDFSdsfdsfsSDSDF")
+for i in range(0, 3, 1):
     print("d")
-print("SDFDSFSDF")
+print("SDFDSFdsfdsSDF")
