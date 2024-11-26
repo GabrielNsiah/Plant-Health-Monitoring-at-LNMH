@@ -2,3 +2,4 @@ pytest
 pylint
 requests
 pandas
+pytest-cov
