@@ -2,12 +2,7 @@
 import unittest
 from unittest.mock import patch
 import requests
-from extract import function_to_test, fetch_api_plant_data, get_all_plant_data
-
-
-def test_working_function():
-    """A test function to allow GitHub Actions to complete"""
-    assert function_to_test() is True
+from extract import fetch_api_plant_data, get_all_plant_data
 
 
 @patch("extract.requests.get")

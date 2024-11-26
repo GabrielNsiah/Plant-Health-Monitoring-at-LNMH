@@ -2,11 +2,6 @@
 import requests
 
 
-def function_to_test():
-    """A function to test GitHub Actions"""
-    return True
-
-
 def fetch_api_plant_data(plant_id: int) -> dict:
     """Gets plant data for a plant with given id,
     returning the data as a dictionary."""
