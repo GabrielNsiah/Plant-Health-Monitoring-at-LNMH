@@ -2,4 +2,5 @@
 
 
 def function_to_test():
+    """Function to test the github Action"""
     return True
