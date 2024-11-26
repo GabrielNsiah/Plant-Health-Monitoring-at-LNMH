@@ -10,13 +10,13 @@ def function_to_test():
 def fetch_api_plant_data(plant_id: int) -> dict:
     """Gets plant data for a plant with given id, 
     returning the data as a dictionary."""
-    ...
+    return
 
 
 def get_all_plant_data() -> list[dict]:
     """Returns all plant data for all 50 plants as
     a list of dictionaries."""
-    ...
+    return
 
 
 if __name__ == "__main__":
