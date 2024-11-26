@@ -54,5 +54,13 @@ def export_as_csv(plant_df: pd.DataFrame) -> None:
     plant_df.to_csv("PLANT_DATA.csv", index=False)
 
 
+def fully_transform_data(plant_data: list[dict]) -> None:
+    """Fully transforms the given plant data and also
+        Exports it to a csv file"""
+    plant_df = insert_in_dataframe(plant_data)
+    plant_df = clean_data(plant_df)
+    export_as_csv(plant_df)
+
+
 if __name__ == "__main__":
     pass
