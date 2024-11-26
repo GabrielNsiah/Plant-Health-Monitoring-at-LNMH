@@ -3,5 +3,5 @@ from extract import function_to_test
 
 
 def test_working_function():
-    """Function to test the github Action"""
+    """A test function to allow GitHub Actions to complete"""
     assert function_to_test() is True
