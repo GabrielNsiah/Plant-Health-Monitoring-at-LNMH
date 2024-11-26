@@ -2,6 +2,7 @@
 IF OBJECT_ID('delta.Recordings', 'U') IS NOT NULL
     DROP TABLE delta.Recordings;
 
+
 IF OBJECT_ID('delta.Assignments', 'U') IS NOT NULL
     DROP TABLE delta.Assignments;
 
