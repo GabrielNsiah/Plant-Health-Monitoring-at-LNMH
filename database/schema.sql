@@ -66,7 +66,7 @@ CREATE TABLE delta.Plants (
     plant_name VARCHAR(30) UNIQUE,
     scientific_id INT UNIQUE,
     location_id INT NOT NULL,
-    image_url VARCHAR(100),
+    image_url VARCHAR(300),
     primary key (plant_id),
     FOREIGN KEY (scientific_id) REFERENCES delta.Scientific_Names (scientific_id),
     FOREIGN KEY (location_id) REFERENCES delta.Locations (location_id)
