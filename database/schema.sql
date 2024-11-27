@@ -29,13 +29,12 @@ CREATE TABLE delta.Continents (
 );
 
 INSERT INTO delta.Continents (continent_id, continent_name) VALUES
-(1, 'North America'),
-(2, 'South America'),
-(3, 'Asia'),
-(4, 'Antarctica'),
-(5, 'Europe'),
-(6, 'Africa'),
-(7, 'Oceania')
+(1, 'America'),
+(2, 'Asia'),
+(3, 'Antarctica'),
+(4, 'Europe'),
+(5, 'Africa'),
+(6, 'Pacific')
 ;
 
 CREATE TABLE delta.Locations (
