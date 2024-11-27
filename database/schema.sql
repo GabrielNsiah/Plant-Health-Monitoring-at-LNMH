@@ -65,8 +65,8 @@ CREATE TABLE delta.Botanists (
 
 CREATE TABLE delta.Plants (
     plant_id INT UNIQUE NOT NULL,
-    plant_name VARCHAR(30) UNIQUE,
-    scientific_id INT UNIQUE,
+    plant_name VARCHAR(30),
+    scientific_id INT,
     location_id INT NOT NULL,
     image_url VARCHAR(300),
     primary key (plant_id),
