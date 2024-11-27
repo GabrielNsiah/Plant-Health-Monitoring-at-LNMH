@@ -1,5 +1,6 @@
 """This is the Transform portion of the ETL script"""
 import pandas as pd
+import requests
 
 
 def insert_in_dataframe(plant_data: list[dict]) -> pd.DataFrame:
@@ -63,4 +64,6 @@ def fully_transform_data(plant_data: list[dict]) -> None:
 
 
 if __name__ == "__main__":
+    plant_data = get_all_plant_data()
+    fully_transform_data(plant_data)
     pass
