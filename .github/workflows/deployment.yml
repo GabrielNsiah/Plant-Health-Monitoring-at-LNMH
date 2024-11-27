@@ -1,5 +1,8 @@
 name: Deployment Workflow
 
+permissions:
+  contents: write
+
 on:
   push:
     branches:
