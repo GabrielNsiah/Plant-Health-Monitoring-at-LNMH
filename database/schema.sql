@@ -49,9 +49,11 @@ CREATE TABLE delta.Locations (
 );
 
 CREATE TABLE delta.Scientific_Names (
-    scientific_id INT IDENTITY (1, 1) PRIMARY KEY,
+    scientific_id INT IDENTITY (0, 1) PRIMARY KEY,
     scientific_name VARCHAR(50) NOT NULL UNIQUE
 );
+
+INSERT INTO delta.Scientific_Names (scientific_name) VALUES ('None');
 
 CREATE TABLE delta.Botanists (
     botanist_id INT IDENTITY (1, 1) PRIMARY KEY,
