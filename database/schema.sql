@@ -29,13 +29,12 @@ CREATE TABLE delta.Continents (
 );
 
 INSERT INTO delta.Continents (continent_id, continent_name) VALUES
-(1, 'North America'),
-(2, 'South America'),
-(3, 'Asia'),
-(4, 'Antarctica'),
-(5, 'Europe'),
-(6, 'Africa'),
-(7, 'Oceania')
+(1, 'America'),
+(2, 'Asia'),
+(3, 'Antarctica'),
+(4, 'Europe'),
+(5, 'Africa'),
+(6, 'Pacific')
 ;
 
 CREATE TABLE delta.Locations (
@@ -50,9 +49,11 @@ CREATE TABLE delta.Locations (
 );
 
 CREATE TABLE delta.Scientific_Names (
-    scientific_id INT IDENTITY (1, 1) PRIMARY KEY,
+    scientific_id INT IDENTITY (0, 1) PRIMARY KEY,
     scientific_name VARCHAR(50) NOT NULL UNIQUE
 );
+
+INSERT INTO delta.Scientific_Names (scientific_name) VALUES ('None');
 
 CREATE TABLE delta.Botanists (
     botanist_id INT IDENTITY (1, 1) PRIMARY KEY,
@@ -67,7 +68,7 @@ CREATE TABLE delta.Plants (
     plant_name VARCHAR(30) UNIQUE,
     scientific_id INT UNIQUE,
     location_id INT NOT NULL,
-    image_url VARCHAR(100),
+    image_url VARCHAR(300),
     primary key (plant_id),
     FOREIGN KEY (scientific_id) REFERENCES delta.Scientific_Names (scientific_id),
     FOREIGN KEY (location_id) REFERENCES delta.Locations (location_id)

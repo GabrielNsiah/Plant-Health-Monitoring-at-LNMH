@@ -11,4 +11,4 @@ __pycache__
 
 .terraform
 *.tfvars
-.terraform.lock.hcl
+lambda_mover.py

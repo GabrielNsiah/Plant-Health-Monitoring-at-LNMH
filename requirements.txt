@@ -3,3 +3,5 @@ pylint
 requests
 pandas
 pytest-cov
+python-dotenv
+pymssql
