@@ -27,8 +27,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python3.9 -m pip3.9 install --upgrade pip
-          python3.9 -m pip3.9 install -r requirements.txt
+          python3.9 -m pip3 install --upgrade pip
+          python3.9 -m pip3 install -r requirements.txt
 
       - name: Run pytest
         id: pytest
