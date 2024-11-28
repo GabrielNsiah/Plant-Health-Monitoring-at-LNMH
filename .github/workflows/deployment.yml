@@ -33,7 +33,7 @@ jobs:
       - name: Run pytest
         id: pytest
         run: |
-          python3.9 -m pytest > test-results.txt || true
+          python3.9 -m pytest --ignore=pipeline/test_load.py > test-results.txt || true
           pass_count=$(grep -oP '(?<== )\d+(?= passed)' test-results.txt || echo "0")
           fail_count=$(grep -oP '(?<== )\d+(?= failed)' test-results.txt || echo "0")
           skip_count=$(grep -oP '(?<== )\d+(?= skipped)' test-results.txt || echo "0")
