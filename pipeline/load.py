@@ -1,11 +1,22 @@
 """This is the script to load plant data into the database"""
 from os import environ
-import pandas as pd
 from datetime import datetime
+import logging
+import pandas as pd
 import pymssql
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
+def config_log() -> None:
+    """Terminal logs configuration"""
+    logging.basicConfig(
+        format="{asctime} - {levelname} - {message}",
+        style="{",
+        datefmt="%Y-%m-%d %H:%M",
+        level=logging.INFO,
+    )
 
 
 def load_csv() -> pd.DataFrame:
@@ -27,8 +38,25 @@ def get_connection() -> None:
     return connection
 
 
-def find_location_id(cursor: pymssql.Cursor, latitude: int, longitude: int, town: str, country_code: str,
-                     continent_id: str, city: str) -> int:
+def get_continents(cursor) -> dict:
+    """Returns a dictionart continent names and their IDs
+        from the database.
+        Continents are Keys and IDs are Values"""
+
+    cursor.execute("""SELECT *
+                FROM delta.Continents""")
+    continent_ids = cursor.fetchall()
+
+    continent_dict = {}
+
+    for data in continent_ids:
+        continent_dict[data[1]] = data[0]
+
+    return continent_dict
+
+
+def find_location_id(cursor, latitude: int, longitude: int, town: str,
+                     country_code: str, continent_id: str, city: str) -> int:
     """Returns the location ID as shown in the database based on data given."""
     cursor.execute("""
                 SELECT location_id
@@ -41,7 +69,7 @@ def find_location_id(cursor: pymssql.Cursor, latitude: int, longitude: int, town
     return location_id
 
 
-def find_botanist_id(cursor: pymssql.Cursor, first_name, last_name, email, phone) -> int:
+def find_botanist_id(cursor, first_name, last_name, email, phone) -> int:
     """Returns the botanist as shown in the database based on data given."""
     cursor.execute("""
                 SELECT botanist_id
@@ -53,7 +81,8 @@ def find_botanist_id(cursor: pymssql.Cursor, first_name, last_name, email, phone
     return botanist_id
 
 
-def find_plant_id(cursor: pymssql.Cursor, plant_name, scientific_name_id, location_id, image_url) -> int:
+def find_plant_id(cursor, plant_name: str,
+                  scientific_name_id: int, location_id: int, image_url: str) -> int:
     """Returns the botanist as shown in the database based on data given."""
     cursor.execute("""
             SELECT plant_id
@@ -66,7 +95,7 @@ def find_plant_id(cursor: pymssql.Cursor, plant_name, scientific_name_id, locati
     return plant_id
 
 
-def find_scientific_name_id(cursor: pymssql.Cursor, scientific_name: str) -> int:
+def find_scientific_name_id(cursor, scientific_name: str) -> int:
     cursor.execute("""
             SELECT scientific_id
             FROM delta.Scientific_Names
@@ -77,10 +106,10 @@ def find_scientific_name_id(cursor: pymssql.Cursor, scientific_name: str) -> int
     return scientific_id
 
 
-def insert_botanists(cursor: pymssql.Cursor, plant_df: pd.DataFrame) -> None:
+def insert_botanists(cursor, plant_df: pd.DataFrame) -> None:
     """Inserts Botanist data into the relevant tables in the database
         Ignores duplicate entries"""
-    for index, row in plant_df.iterrows():
+    for _, row in plant_df.iterrows():
         first_name = row["First Name"]
         last_name = row["Last Name"]
         email = row["botanist.email"]
@@ -95,24 +124,26 @@ def insert_botanists(cursor: pymssql.Cursor, plant_df: pd.DataFrame) -> None:
 
         count = cursor.fetchone()[0]
 
-        if count == 0:
+        if not count:
             cursor.execute("""
                 INSERT INTO delta.Botanists (first_name, last_name, email, phone)
                 VALUES (%s, %s, %s, %s);
             """, (first_name, last_name, email, phone))
-            print(f"Inserted: {first_name} {last_name}, {email}, {phone}")
+            logging.info(
+                "Inserted Botanist {first_name} {last_name}:, Email: {email}, Phone: {phone}")
         else:
-            print(f"""Duplicate found: {first_name} {
-                    last_name}, {email}, {phone}""")
+            logging.info("""Botanist {first_name} {last_name} already exists with these details,
+                         Email: {email}, Phone Number: {phone}""")
 
 
-def insert_scientific_name(cursor: pymssql.Cursor, plant_df: pd.DataFrame) -> None:
+def insert_scientific_name(cursor, plant_df: pd.DataFrame) -> None:
     """Inserts the scientific name of a plant into the database
         Ignores duplicate entries"""
-    for index, row in plant_df.iterrows():
+    for _, row in plant_df.iterrows():
         scientific_name = row["scientific_name"]
         if pd.isna(scientific_name):
             scientific_name = "None"
+
         cursor.execute("""
             SELECT COUNT(*)
             FROM delta.Scientific_Names
@@ -121,20 +152,20 @@ def insert_scientific_name(cursor: pymssql.Cursor, plant_df: pd.DataFrame) -> No
 
         count = cursor.fetchone()[0]
 
-        if count == 0:
+        if not count:
             cursor.execute("""
                 INSERT INTO delta.Scientific_Names (scientific_name)
                 VALUES (%s);
             """, (scientific_name))
-            print(f"Inserted: {scientific_name}")
+            logging.info(f"Inserted Scientific Name: {scientific_name}")
         else:
-            print(f"Duplicate: {scientific_name}")
+            logging.info(f"Duplicate Scientific Name: {scientific_name}")
 
 
-def insert_location(cursor: pymssql.Cursor, plant_df: pd.DataFrame) -> None:
+def insert_location(cursor, plant_df: pd.DataFrame) -> None:
     """Inserts the location of a plant into the database
         Ignores duplicate entries"""
-    for index, row in plant_df.iterrows():
+    for _, row in plant_df.iterrows():
         latitude = row["Latitude"]
         longitude = row["Longitude"]
         town = row["Town"]
@@ -142,11 +173,8 @@ def insert_location(cursor: pymssql.Cursor, plant_df: pd.DataFrame) -> None:
         continent = row["Continent"]
         city = row["City"]
 
-        cursor.execute("""SELECT continent_id
-                    FROM delta.Continents
-                    WHERE continent_name = %s;
-                    """, (continent))
-        continent_id = cursor.fetchone()[0]
+        continents = get_continents(cursor)
+        continent_id = continents[continent]
 
         cursor.execute("""
             SELECT COUNT(*)
@@ -157,42 +185,32 @@ def insert_location(cursor: pymssql.Cursor, plant_df: pd.DataFrame) -> None:
 
         count = cursor.fetchone()[0]
 
-        if count == 0:
+        if not count:
             cursor.execute("""
                 INSERT INTO delta.Locations (latitude, longitude, town, country_code, continent_id, city)
                 VALUES (%s, %s, %s, %s, %s, %s);
             """, (latitude, longitude, town, country_code, continent_id, city))
-            print(
-                f"Inserted: ({latitude}, {longitude}, {town}, {country_code}, {continent_id}, {city})")
+            logging.info(
+                f"""Inserted Location: (Lat: {latitude}, Long: {longitude}, Town: {town},
+                Country Code: {country_code}, Contintent: {continent}, City: {city})""")
         else:
-            print(f"""Duplicate: {latitude}, {longitude}, {
-                    town}, {country_code}, {continent_id}, {city}""")
+            logging.info(f"""Duplicate Location: (Lat: {latitude}, Long: {longitude}, Town: {town},
+                Country Code: {country_code}, Contintent: {continent}, City: {city})""")
 
 
-def insert_plants(cursor: pymssql.Cursor, plant_df: pd.DataFrame) -> None:
+def insert_plants(cursor, plant_df: pd.DataFrame) -> None:
     """Inserts plant information into the database
         Ignores duplicate entries"""
-    for index, row in plant_df.iterrows():
+    for _, row in plant_df.iterrows():
         plant_id = row["plant_id"]
         plant_name = row["name"]
-        scientific_name = row["scientific_name"]
-        latitude = row["Latitude"]
-        longitude = row["Longitude"]
         image_url = row["images.original_url"]
-        town = row["Town"]
-        country_code = row["Country_Code"]
         continent = row["Continent"]
-        city = row["City"]
+        scientific_name = row["scientific_name"]
 
-        try:
-            cursor.execute("""SELECT continent_id
-                        FROM delta.Continents
-                        WHERE continent_name = %s;
-                        """, (continent))
-            continent_id = cursor.fetchone()[0]
-        except:
-            continue
-        if pd.isna(scientific_name):
+        continent_id = get_continents(cursor)[continent]
+
+        if pd.isna(row["scientific_name"]):
             scientific_name = "None"
         scientific_name_id = find_scientific_name_id(
             cursor, scientific_name)
@@ -201,7 +219,8 @@ def insert_plants(cursor: pymssql.Cursor, plant_df: pd.DataFrame) -> None:
             image_url = "None"
 
         location_id = find_location_id(
-            cursor, latitude, longitude, town, country_code, continent_id, city)
+            cursor, row["Latitude"], row["Longitude"], row["Town"],
+            row["Country_Code"], continent_id, row["City"])
 
         cursor.execute("""
             SELECT COUNT(*)
@@ -212,20 +231,22 @@ def insert_plants(cursor: pymssql.Cursor, plant_df: pd.DataFrame) -> None:
 
         count = cursor.fetchone()[0]
 
-        if count == 0:
+        if not count:
             cursor.execute("""
                 INSERT INTO delta.Plants (plant_id, plant_name, scientific_id, location_id, image_url)
                 VALUES (%s, %s, %s, %s, %s);
             """, (plant_id, plant_name, scientific_name_id, location_id, image_url))
-            print(
-                f"Inserted: ({plant_id}, {plant_name}, {scientific_name_id}, {location_id}, {image_url})")
+            logging.info(
+                f"""Inserted Plant (Plant ID: {plant_id}, Plant Name: {plant_name}, Scientific Name: 
+                {scientific_name_id}, Location ID: {location_id}, Image URL: {image_url})""")
         else:
-            print(f"""Duplicate: ({plant_id}, {plant_name}, {
-                scientific_name_id}, {location_id}, {image_url})""")
+            logging.info(f"""Duplicate Plant: (Plant ID: {plant_id}, Plant Name: {plant_name}, Scientific Name: 
+                         {scientific_name_id}, Location ID: {location_id}, Image URL: {image_url})""")
 
 
-def insert_recording(cursor: pymssql.Cursor,  plant_df: pd.DataFrame) -> None:
-    for index, row in plant_df.iterrows():
+def insert_recording(cursor,  plant_df: pd.DataFrame) -> None:
+    """Inserts a recording of plant status into the database."""
+    for _, row in plant_df.iterrows():
         plant_id = row["plant_id"]
         last_watered = row["last_watered"]
         soil_moisture = row["soil_moisture"]
@@ -247,20 +268,21 @@ def insert_recording(cursor: pymssql.Cursor,  plant_df: pd.DataFrame) -> None:
 
         count = cursor.fetchone()[0]
 
-        if count == 0:
+        if not count:
             cursor.execute("""
                         INSERT INTO delta.Recordings (plant_id, last_watered, soil_moisture, temperature, reading_taken)
                         VALUES (%s, %s, %s, %s, %s);""", (plant_id, watered_datetime, soil_moisture, temperature, reading_taken))
-            print(
-                f"Inserted: ({plant_id}, {watered_datetime}, {soil_moisture}, {temperature}, {reading_taken})")
+            logging.info(
+                f"""Inserted recording: (Plant ID: {plant_id}, Last Watered: {watered_datetime}, Soil Moisture: {soil_moisture}, 
+                Temperature: {temperature}, Reading Taken: {reading_taken})""")
         else:
-            print(f"""Duplicate: ({plant_id}, {watered_datetime}, {
-                    soil_moisture}, {temperature}, {reading_taken})""")
+            logging.info(f"""Duplicate recording: (Plant ID: {plant_id}, Last Watered: {watered_datetime},
+                         Soil Moisture: {soil_moisture}, Temperature: {temperature}, Reading Taken: {reading_taken})""")
 
 
-def insert_assignments(cursor: pymssql.Cursor, plant_df: pd.DataFrame) -> None:
+def insert_assignments(cursor, plant_df: pd.DataFrame) -> None:
     """Inserts the Botanist/Plant Assignment into the database."""
-    for index, row in plant_df.iterrows():
+    for _, row in plant_df.iterrows():
         plant_id = row["plant_id"]
         plant_name = row["name"]
         scientific_name = row["scientific_name"]
@@ -285,14 +307,10 @@ def insert_assignments(cursor: pymssql.Cursor, plant_df: pd.DataFrame) -> None:
 
         if pd.isna(image_url):
             image_url = "None"
-        try:
-            cursor.execute("""SELECT continent_id
-                            FROM delta.Continents
-                            WHERE continent_name = %s;
-                            """, (continent))
-            continent_id = cursor.fetchone()[0]
-        except:
-            continue
+
+        continents = get_continents(cursor)
+        continent_id = continents[continent]
+
         location_id = find_location_id(
             cursor, latitude, longitude, town, country_code, continent_id, city)
         plant_id = find_plant_id(
@@ -305,24 +323,36 @@ def insert_assignments(cursor: pymssql.Cursor, plant_df: pd.DataFrame) -> None:
                     """, (botanist_id, plant_id))
         count = cursor.fetchone()[0]
 
-        if count == 0:
-            cursor.execute("""
-                        INSERT INTO delta.Assignments (botanist_id, plant_id)
-                        VALUES (%s, %s);""", (botanist_id, plant_id))
-            print(f"""Registered assignment of {first_name} {
-                    last_name} {botanist_id} to {plant_name} {plant_id}""")
-        else:
-            print(f"""Duplicate assignment of {first_name} {
-                    last_name} {botanist_id} to {plant_name} {plant_id} """)
+    if not count:
+        cursor.execute("""
+            INSERT INTO delta.Assignments (botanist_id, plant_id)
+            VALUES (%s, %s);
+        """, (botanist_id, plant_id))
+        logging.info(
+            "Registered assignment: Botanist '%s %s' (ID: %d) assigned to Plant '%s' (ID: %d)",
+            first_name, last_name, botanist_id, plant_name, plant_id
+        )
+    else:
+        logging.info(
+            "Duplicate assignment detected: Botanist '%s %s' (ID: %d) already assigned to Plant '%s' (ID: %d)",
+            first_name, last_name, botanist_id, plant_name, plant_id
+        )
 
 
-if __name__ == "__main__":
+def load_data_into_database() -> None:
+    """Loads data from the PLANT_DATA.csv into the database"""
     connection = get_connection()
     cursor = connection.cursor()
     plant_data = load_csv()
+
     insert_botanists(cursor, plant_data)
     insert_scientific_name(cursor, plant_data)
     insert_location(cursor, plant_data)
     insert_plants(cursor, plant_data)
     insert_recording(cursor, plant_data)
     insert_assignments(cursor, plant_data)
+
+
+if __name__ == "__main__":
+    config_log()
+    load_data_into_database()
