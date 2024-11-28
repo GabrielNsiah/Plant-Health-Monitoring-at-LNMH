@@ -323,8 +323,8 @@ def insert_assignments(cursor, plant_df: pd.DataFrame) -> None:
         scientific_name_id = find_scientific_name_id(
             cursor, plant_data["scientific_name"])
 
-        if pd.isna(image_url):
-            image_url = "None"
+        if pd.isna(plant_data["image_url"]):
+            plant_data["image_url"] = "None"
 
         continents = get_continents(cursor)
         continent_id = continents[plant_data["continent"]]
