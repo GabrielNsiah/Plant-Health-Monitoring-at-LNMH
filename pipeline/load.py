@@ -41,8 +41,7 @@ def get_continents(cursor) -> dict:
         from the database.
         Continents are Keys and IDs are Values"""
 
-    cursor.execute("""SELECT *
-                FROM delta.Continents""")
+    cursor.execute("""SELECT * FROM delta.Continents""")
     continent_ids = cursor.fetchall()
 
     continent_dict = {}
