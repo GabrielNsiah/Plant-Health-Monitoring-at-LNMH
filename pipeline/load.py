@@ -332,7 +332,7 @@ def insert_assignments(cursor, plant_df: pd.DataFrame) -> None:
         location_id = find_location_id(
             cursor, row, continent_id)
         plant_id = find_plant_id(
-            cursor, plant_data["plant_name"], scientific_name_id, location_id, image_url)
+            cursor, plant_data["plant_name"], scientific_name_id, location_id, plant_data["image_url"])
 
         cursor.execute("""
                     SELECT COUNT(*)
