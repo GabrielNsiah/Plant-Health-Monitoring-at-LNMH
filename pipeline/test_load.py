@@ -50,7 +50,7 @@ def test_load_csv(mock_read_csv):
     mock_read_csv.return_value = MOCK_DF
     result = load_csv()
     pd.testing.assert_frame_equal(result, MOCK_DF)
-    mock_read_csv.assert_called_once_with("PLANT_DATA.csv")
+    mock_read_csv.assert_called_once_with("/tmp/PLANT_DATA.csv")
 
 
 @patch("load.pymssql.connect")
