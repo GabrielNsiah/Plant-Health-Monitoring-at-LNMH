@@ -1,13 +1,13 @@
-import pytest
-from lambda_mover import convert_data_to_df, merge_with_existing_recordings, query_database
-from os import environ
-import boto3
-import pymssql
-from dotenv import load_dotenv
-import pandas as pd
+# pylint: disable=no-member
+"""Test file using integrated testing for lambda_mover.py"""
+
 from datetime import datetime
+from os import environ
 from unittest.mock import patch
-from pandas.testing import assert_frame_equal
+from dotenv import load_dotenv
+import pytest
+import pymssql
+from lambda_mover import convert_data_to_df, merge_with_existing_recordings, query_database
 
 load_dotenv()
 
@@ -93,11 +93,12 @@ def test_query_database():
 
 
 @patch("lambda_mover.download_csv_from_s3")
-def test_merge_with_existing_recordings(mock_download_csv, test_recording_1, test_recording_2, test_recording_3):
+def test_merge_with_existing_recordings(mock_download_csv, test_recording_1,
+                                        test_recording_2, test_recording_3):
     """tests the merge_with_existing_recordings function to
     ensure the merged pandas df is the combined length of
     the test csv file and test df."""
-    mock_download_csv.return_value = True
+    mock_download_csv.return_value = False
     test_input_test_data_into_rds(
         test_recording_1, test_recording_2, test_recording_3)
     test_recordings = query_database(conn, True)
@@ -111,11 +112,4 @@ def test_merge_with_existing_recordings(mock_download_csv, test_recording_1, tes
     assert len(test_updated_df) == 4
 
 
-def test_drop_test_table():
-    """Drops test table on RDS"""
-    with conn.cursor() as cur:
-        cur.execute("""
-IF OBJECT_ID('delta.Test_Recordings', 'U') IS NOT NULL
-    DROP TABLE delta.Test_Recordings;""")
-
-    conn.commit()
+test_drop_test_table()
