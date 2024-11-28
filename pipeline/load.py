@@ -19,7 +19,7 @@ def config_log() -> None:
 
 def load_csv() -> pd.DataFrame:
     """Loads a given csv into a dataframe"""
-    plant_data = pd.read_csv("PLANT_DATA.csv")
+    plant_data = pd.read_csv("/tmp/PLANT_DATA.csv")
     return plant_data
 
 
