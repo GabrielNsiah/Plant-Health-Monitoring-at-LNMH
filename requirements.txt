@@ -5,3 +5,4 @@ pandas
 pytest-cov
 python-dotenv
 pymssql
+boto3
