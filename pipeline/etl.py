@@ -13,5 +13,6 @@ def run_etl():
     load_data_into_database()
 
 
-if __name__ == "__main__":
-    run_etl()
+def lambda_handler(event=None, context=None):
+    load_dotenv()
+    load_data_into_database()

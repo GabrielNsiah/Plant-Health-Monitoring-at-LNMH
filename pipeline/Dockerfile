@@ -15,5 +15,7 @@ COPY load.py .
 COPY etl.py .
 
 EXPOSE 1433
+EXPOSE 80
+EXPOSE 443
 
 CMD [ "etl.lambda_handler" ]
