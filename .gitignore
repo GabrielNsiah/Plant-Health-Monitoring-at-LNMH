@@ -11,4 +11,3 @@ __pycache__
 
 .terraform
 *.tfvars
-lambda_mover.py
