@@ -14,5 +14,4 @@ def run_etl():
 
 
 def lambda_handler(event=None, context=None):
-    load_dotenv()
-    load_data_into_database()
+    run_etl()
