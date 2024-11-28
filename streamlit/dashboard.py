@@ -2,7 +2,6 @@
 
 import streamlit as st
 import pandas as pd
-import redshift_connector
 import pymssql
 import os
 from os import environ
