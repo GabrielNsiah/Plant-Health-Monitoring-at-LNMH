@@ -63,7 +63,7 @@ def clean_data(plant_df: pd.DataFrame) -> pd.DataFrame:
 
 def export_as_csv(plant_df: pd.DataFrame) -> None:
     """Exports the dataframe as a csv file."""
-    plant_df.to_csv("PLANT_DATA.csv", index=False)
+    plant_df.to_csv("/tmp/PLANT_DATA.csv", index=False)
 
 
 def fully_transform_data(plant_data: list[dict]) -> None:
