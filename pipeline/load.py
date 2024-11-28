@@ -318,10 +318,10 @@ def insert_assignments(cursor, plant_df: pd.DataFrame) -> None:
         botanist_id = find_botanist_id(
             cursor, plant_data["first_name"], plant_data["last_name"],
             plant_data["email"], plant_data["phone"])
-        if pd.isna(scientific_name):
-            scientific_name = "None"
+        if pd.isna(plant_data["scientific_name"]):
+            plant_data["scientific_name"] = "None"
         scientific_name_id = find_scientific_name_id(
-            cursor, scientific_name)
+            cursor, plant_data["scientific_name"])
 
         if pd.isna(image_url):
             image_url = "None"
