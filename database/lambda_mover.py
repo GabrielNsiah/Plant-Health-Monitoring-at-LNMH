@@ -46,22 +46,31 @@ def download_csv_from_s3(s3: boto3.client) -> bool:
     return False
 
 
+def make_existing_recordings_df(test_mode: bool) -> pd.DataFrame:
+    """Creates empty df if no csv file found on S3,
+    fills empty df with test data if test_mode = True."""
+    existing_recordings_df = pd.DataFrame(columns=['recording_id', 'plant_id',
+                                                   'last_watered', 'soil_moisture',
+                                                   'temperature', 'recording_taken'])
+    if test_mode is True:
+        existing_recordings_df.loc[0] = [
+            2, 10, "2024-11-27 14:35:45", 40.22, 23.1, "2024-11-24 19:35:45"]
+        existing_recordings_df.loc[1] = [
+            1, 10, "2024-11-27 14:35:45", 40.22, 23.1, "2024-11-24 12:35:45"]
+
+    return existing_recordings_df
+
+
 def merge_with_existing_recordings(recordings_df: pd.DataFrame, s3: boto3.client,
                                    test_mode=False) -> pd.DataFrame:
     """Merges df from RDS query with existing df from S3 bucket, sorting by
     newest to oldest recording_taken."""
     file_found = download_csv_from_s3(s3)
-    if test_mode is False:
-        csv_filename = "existing_recordings.csv"
-    else:
-        csv_filename = "test_existing_recordings.csv"
 
-    if file_found is True:
-        existing_recordings_df = pd.read_csv(f'./{csv_filename}')
+    if file_found is True and test_mode is False:
+        existing_recordings_df = pd.read_csv('./existing_recordings.csv')
     else:
-        existing_recordings_df = pd.DataFrame(columns=['recording_id', 'plant_id',
-                                                       'last_watered', 'soil_moisture',
-                                                       'temperature', 'recording_taken'])
+        existing_recordings_df = make_existing_recordings_df(test_mode)
 
     updated_recordings_df = pd.concat(
         [recordings_df, existing_recordings_df], ignore_index=True)
