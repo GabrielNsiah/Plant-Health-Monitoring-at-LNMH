@@ -1,6 +1,18 @@
 """This is the Transform portion of the ETL script"""
 import pandas as pd
 
+import logging
+
+
+def config_log() -> None:
+    """Terminal logs configuration"""
+    logging.basicConfig(
+        format="{asctime} - {levelname} - {message}",
+        style="{",
+        datefmt="%Y-%m-%d %H:%M",
+        level=logging.INFO,
+    )
+
 
 def insert_in_dataframe(plant_data: list[dict]) -> pd.DataFrame:
     """Creates a dataframe for plant data
@@ -57,9 +69,11 @@ def export_as_csv(plant_df: pd.DataFrame) -> None:
 def fully_transform_data(plant_data: list[dict]) -> None:
     """Fully transforms the given plant data and also
         Exports it to a csv file"""
+    config_log()
     plant_df = insert_in_dataframe(plant_data)
     plant_df = clean_data(plant_df)
     export_as_csv(plant_df)
+    logging.info("PLANT_DATA.csv created.")
 
 
 if __name__ == "__main__":

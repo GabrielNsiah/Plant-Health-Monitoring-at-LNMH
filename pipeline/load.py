@@ -363,6 +363,7 @@ def load_data_into_database() -> None:
     connection = get_connection()
     cursor = connection.cursor()
     plant_data = load_csv()
+    config_log()
 
     insert_botanists(cursor, plant_data)
     insert_scientific_name(cursor, plant_data)
@@ -370,6 +371,7 @@ def load_data_into_database() -> None:
     insert_plants(cursor, plant_data)
     insert_recording(cursor, plant_data)
     insert_assignments(cursor, plant_data)
+    connection.commit()
 
 
 def lambda_handler(event=None, context=None):
