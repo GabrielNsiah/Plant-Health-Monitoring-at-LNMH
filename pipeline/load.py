@@ -5,7 +5,6 @@ import logging
 import pandas as pd
 import pymssql
 from dotenv import load_dotenv
-
 load_dotenv()
 
 
@@ -55,15 +54,15 @@ def get_continents(cursor) -> dict:
     return continent_dict
 
 
-def find_location_id(cursor, latitude: int, longitude: int, town: str,
-                     country_code: str, continent_id: str, city: str) -> int:
+def find_location_id(cursor, plant_data: dict[str], continent_id: str) -> int:
     """Returns the location ID as shown in the database based on data given."""
     cursor.execute("""
                 SELECT location_id
                 FROM delta.Locations
                 WHERE latitude = %s AND longitude = %s AND town = %s
                         AND country_code = %s AND continent_id = %s AND city = %s;
-            """, (latitude, longitude, town, country_code, continent_id, city))
+            """, (plant_data["Latitude"], plant_data["Longitude"], plant_data["Town"],
+                  plant_data["Country_Code"], continent_id, plant_data["City"]))
     location_id = cursor.fetchone()[0]
 
     return location_id
@@ -96,6 +95,7 @@ def find_plant_id(cursor, plant_name: str,
 
 
 def find_scientific_name_id(cursor, scientific_name: str) -> int:
+    """Returns the scientific name as shown in the database based on data given."""
     cursor.execute("""
             SELECT scientific_id
             FROM delta.Scientific_Names
@@ -130,10 +130,13 @@ def insert_botanists(cursor, plant_df: pd.DataFrame) -> None:
                 VALUES (%s, %s, %s, %s);
             """, (first_name, last_name, email, phone))
             logging.info(
-                "Inserted Botanist {first_name} {last_name}:, Email: {email}, Phone: {phone}")
+                "Inserted Botanist %s %s: Email: %s, Phone: %s",
+                first_name, last_name, email, phone)
         else:
-            logging.info("""Botanist {first_name} {last_name} already exists with these details,
-                         Email: {email}, Phone Number: {phone}""")
+            logging.info(
+                "Botanist %s %s already exists with these details, Email: %s, Phone Number: %s",
+                first_name, last_name, email, phone
+            )
 
 
 def insert_scientific_name(cursor, plant_df: pd.DataFrame) -> None:
@@ -157,9 +160,9 @@ def insert_scientific_name(cursor, plant_df: pd.DataFrame) -> None:
                 INSERT INTO delta.Scientific_Names (scientific_name)
                 VALUES (%s);
             """, (scientific_name))
-            logging.info(f"Inserted Scientific Name: {scientific_name}")
+            logging.info("Inserted Scientific Name: %s", scientific_name)
         else:
-            logging.info(f"Duplicate Scientific Name: {scientific_name}")
+            logging.info("Duplicate Scientific Name: %s", scientific_name)
 
 
 def insert_location(cursor, plant_df: pd.DataFrame) -> None:
@@ -191,11 +194,16 @@ def insert_location(cursor, plant_df: pd.DataFrame) -> None:
                 VALUES (%s, %s, %s, %s, %s, %s);
             """, (latitude, longitude, town, country_code, continent_id, city))
             logging.info(
-                f"""Inserted Location: (Lat: {latitude}, Long: {longitude}, Town: {town},
-                Country Code: {country_code}, Contintent: {continent}, City: {city})""")
+                """Inserted Location: (Lat: %s, Long: %s, Town: %s, 
+                Country Code: %s, Continent: %s, City: %s)""",
+                latitude, longitude, town, country_code, continent, city
+            )
         else:
-            logging.info(f"""Duplicate Location: (Lat: {latitude}, Long: {longitude}, Town: {town},
-                Country Code: {country_code}, Contintent: {continent}, City: {city})""")
+            logging.info(
+                """Duplicate Location: (Lat: %s, Long: %s, Town: %s, 
+                Country Code: %s, Continent: %s, City: %s)""",
+                latitude, longitude, town, country_code, continent, city
+            )
 
 
 def insert_plants(cursor, plant_df: pd.DataFrame) -> None:
@@ -219,8 +227,7 @@ def insert_plants(cursor, plant_df: pd.DataFrame) -> None:
             image_url = "None"
 
         location_id = find_location_id(
-            cursor, row["Latitude"], row["Longitude"], row["Town"],
-            row["Country_Code"], continent_id, row["City"])
+            cursor, row, continent_id)
 
         cursor.execute("""
             SELECT COUNT(*)
@@ -237,11 +244,16 @@ def insert_plants(cursor, plant_df: pd.DataFrame) -> None:
                 VALUES (%s, %s, %s, %s, %s);
             """, (plant_id, plant_name, scientific_name_id, location_id, image_url))
             logging.info(
-                f"""Inserted Plant (Plant ID: {plant_id}, Plant Name: {plant_name}, Scientific Name: 
-                {scientific_name_id}, Location ID: {location_id}, Image URL: {image_url})""")
+                """Inserted Plant (Plant ID: %s, Plant Name: %s, 
+                Scientific Name: %s, Location ID: %s, Image URL: %s)""",
+                plant_id, plant_name, scientific_name_id, location_id, image_url
+            )
         else:
-            logging.info(f"""Duplicate Plant: (Plant ID: {plant_id}, Plant Name: {plant_name}, Scientific Name: 
-                         {scientific_name_id}, Location ID: {location_id}, Image URL: {image_url})""")
+            logging.info(
+                """Duplicate Plant (Plant ID: %s, Plant Name: %s, 
+                Scientific Name: %s, Location ID: %s, Image URL: %s)""",
+                plant_id, plant_name, scientific_name_id, location_id, image_url
+            )
 
 
 def insert_recording(cursor,  plant_df: pd.DataFrame) -> None:
@@ -269,37 +281,43 @@ def insert_recording(cursor,  plant_df: pd.DataFrame) -> None:
         count = cursor.fetchone()[0]
 
         if not count:
-            cursor.execute("""
-                        INSERT INTO delta.Recordings (plant_id, last_watered, soil_moisture, temperature, reading_taken)
-                        VALUES (%s, %s, %s, %s, %s);""", (plant_id, watered_datetime, soil_moisture, temperature, reading_taken))
+            insert_query = """INSERT INTO delta.Recordings (plant_id, last_watered,
+                       soil_moisture, temperature, reading_taken)
+                       VALUES (%s, %s, %s, %s, %s);"""
+            cursor.execute(insert_query, (plant_id, watered_datetime,
+                           soil_moisture, temperature, reading_taken))
             logging.info(
-                f"""Inserted recording: (Plant ID: {plant_id}, Last Watered: {watered_datetime}, Soil Moisture: {soil_moisture}, 
-                Temperature: {temperature}, Reading Taken: {reading_taken})""")
+                """Inserted recording: (Plant ID: %s, Last Watered: %s, 
+                Soil Moisture: %s, Temperature: %s, Reading Taken: %s)""",
+                plant_id, watered_datetime, soil_moisture, temperature, reading_taken
+            )
+
         else:
-            logging.info(f"""Duplicate recording: (Plant ID: {plant_id}, Last Watered: {watered_datetime},
-                         Soil Moisture: {soil_moisture}, Temperature: {temperature}, Reading Taken: {reading_taken})""")
+            logging.info(
+                """Duplicate recording: (Plant ID: %s, Last Watered: %s, 
+                Soil Moisture: %s, Temperature: %s, Reading Taken: %s)""",
+                plant_id, watered_datetime, soil_moisture, temperature, reading_taken
+            )
 
 
 def insert_assignments(cursor, plant_df: pd.DataFrame) -> None:
     """Inserts the Botanist/Plant Assignment into the database."""
     for _, row in plant_df.iterrows():
-        plant_id = row["plant_id"]
-        plant_name = row["name"]
-        scientific_name = row["scientific_name"]
-        latitude = row["Latitude"]
-        longitude = row["Longitude"]
-        image_url = row["images.original_url"]
-        town = row["Town"]
-        country_code = row["Country_Code"]
-        continent = row["Continent"]
-        city = row["City"]
-        first_name = row["First Name"]
-        last_name = row["Last Name"]
-        email = row["botanist.email"]
-        phone = row["botanist.phone"]
+        plant_data = {
+            "plant_id": row["plant_id"],
+            "plant_name": row["name"],
+            "scientific_name": row["scientific_name"],
+            "image_url": row["images.original_url"],
+            "continent": row["Continent"],
+            "first_name": row["First Name"],
+            "last_name": row["Last Name"],
+            "email": row["botanist.email"],
+            "phone": row["botanist.phone"]
+        }
 
         botanist_id = find_botanist_id(
-            cursor, first_name, last_name, email, phone)
+            cursor, plant_data["first_name"], plant_data["last_name"],
+            plant_data["email"], plant_data["phone"])
         if pd.isna(scientific_name):
             scientific_name = "None"
         scientific_name_id = find_scientific_name_id(
@@ -309,12 +327,12 @@ def insert_assignments(cursor, plant_df: pd.DataFrame) -> None:
             image_url = "None"
 
         continents = get_continents(cursor)
-        continent_id = continents[continent]
+        continent_id = continents[plant_data["continent"]]
 
         location_id = find_location_id(
-            cursor, latitude, longitude, town, country_code, continent_id, city)
+            cursor, row, continent_id)
         plant_id = find_plant_id(
-            cursor, plant_name, scientific_name_id, location_id, image_url)
+            cursor, plant_data["plant_name"], scientific_name_id, location_id, image_url)
 
         cursor.execute("""
                     SELECT COUNT(*)
@@ -330,12 +348,15 @@ def insert_assignments(cursor, plant_df: pd.DataFrame) -> None:
         """, (botanist_id, plant_id))
         logging.info(
             "Registered assignment: Botanist '%s %s' (ID: %d) assigned to Plant '%s' (ID: %d)",
-            first_name, last_name, botanist_id, plant_name, plant_id
+            plant_data["first_name"], plant_data["last_name"], botanist_id,
+            plant_data["plant_name"], plant_id
         )
     else:
         logging.info(
-            "Duplicate assignment detected: Botanist '%s %s' (ID: %d) already assigned to Plant '%s' (ID: %d)",
-            first_name, last_name, botanist_id, plant_name, plant_id
+            """Duplicate assignment detected: Botanist '%s %s' (ID: %d) 
+            already assigned to Plant '%s' (ID: %d)""",
+            plant_data["first_name"], plant_data["last_name"], botanist_id,
+            plant_data["plant_name"], plant_id
         )
 
 
