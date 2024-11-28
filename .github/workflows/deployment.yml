@@ -42,9 +42,9 @@ jobs:
         id: pytest
         run: |
           python3.9 -m pytest > test-results.txt || true
-          pass_count=$(grep -oP '(?<== )\d+(?= passed)' test-results.txt || echo "0")
-          fail_count=$(grep -oP '(?<== )\d+(?= failed)' test-results.txt || echo "0")
-          skip_count=$(grep -oP '(?<== )\d+(?= skipped)' test-results.txt || echo "0")
+          pass_count=$(grep -Po '\d+(?= passed)' test-results.txt || echo "0")
+          fail_count=$(grep -Po '\d+(?= failed)' test-results.txt || echo "0")
+          skip_count=$(grep -Po '\d+(?= skipped)' test-results.txt || echo "0")
           total_count=$((pass_count + fail_count + skip_count))
           echo "PASS_COUNT=$pass_count" >> $GITHUB_ENV
           echo "TOTAL_COUNT=$total_count" >> $GITHUB_ENV
