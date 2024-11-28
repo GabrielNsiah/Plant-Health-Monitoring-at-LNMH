@@ -5,7 +5,6 @@ import logging
 import pandas as pd
 import pymssql
 from dotenv import load_dotenv
-load_dotenv()
 
 
 def config_log() -> None:
@@ -374,6 +373,7 @@ def load_data_into_database() -> None:
     insert_assignments(cursor, plant_data)
 
 
-if __name__ == "__main__":
+def lambda_handler(event=None, context=None):
+    load_dotenv()
     config_log()
     load_data_into_database()
