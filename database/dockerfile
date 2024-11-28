@@ -1,0 +1,14 @@
+
+FROM public.ecr.aws/lambda/python:3.10
+
+WORKDIR ${LAMBDA_TASK_ROOT}
+
+COPY requirements.txt .
+
+RUN pip3 install -r requirements.txt
+
+COPY lambda_mover.py .
+
+EXPOSE 1433
+
+CMD [ "lambda_mover.lambda_handler" ]
