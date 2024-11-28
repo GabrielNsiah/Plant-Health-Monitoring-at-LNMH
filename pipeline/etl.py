@@ -13,5 +13,5 @@ def run_etl():
     load_data_into_database()
 
 
-if __name__ == "__main__":
+def lambda_handler(event=None, context=None):
     run_etl()
