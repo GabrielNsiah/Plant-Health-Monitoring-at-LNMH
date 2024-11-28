@@ -27,16 +27,9 @@ def get_connection() -> None:
     return conn
 
 
-def get_information(conn: 'connection') -> None:
-    with conn.cursor() as cur:
-        cur.execute("SELECT * FROM delta.Continents;")
-        data = cur.fetchall()
-
-    return data
-
-
 def find_location_id(conn: 'connection', latitude: int, longitude: int, town: str, country_code: str,
                      continent_id: str, city: str) -> int:
+    """Finds the location ID as shown in the database based on data given."""
     with conn.cursor() as cur:
         cur.execute("""
                     SELECT location_id
@@ -153,14 +146,11 @@ def insert_location(conn: 'connection', plant_df: pd.DataFrame) -> None:
             continent = row["Continent"]
             city = row["City"]
 
-            try:
-                cur.execute("""SELECT continent_id
-                            FROM delta.Continents
-                            WHERE continent_name = %s;
-                            """, (continent))
-                continent_id = cur.fetchone()[0]
-            except:
-                continue
+            cur.execute("""SELECT continent_id
+                        FROM delta.Continents
+                        WHERE continent_name = %s;
+                        """, (continent))
+            continent_id = cur.fetchone()[0]
 
             cur.execute("""
                 SELECT COUNT(*)
@@ -198,8 +188,6 @@ def insert_plants(conn: 'connection', plant_df: pd.DataFrame) -> None:
             country_code = row["Country_Code"]
             continent = row["Continent"]
             city = row["City"]
-
-            print(plant_id)
 
             try:
                 cur.execute("""SELECT continent_id
