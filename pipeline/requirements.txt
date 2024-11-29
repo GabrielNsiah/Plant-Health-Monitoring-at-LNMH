@@ -8,3 +8,4 @@ pymssql
 boto3
 altair
 streamlit
+pymmsql
