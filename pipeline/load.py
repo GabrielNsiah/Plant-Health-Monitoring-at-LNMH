@@ -80,7 +80,7 @@ def find_botanist_id(cursor, first_name, last_name, email, phone) -> int:
 
 def find_plant_id(cursor, plant_name: str,
                   scientific_name_id: int, location_id: int, image_url: str) -> int:
-    """Returns the botanist as shown in the database based on data given."""
+    """Returns the plant ID of the plant with the given info."""
     cursor.execute("""
             SELECT plant_id
             FROM delta.Plants
@@ -213,6 +213,9 @@ def insert_plants(cursor, plant_df: pd.DataFrame) -> None:
         image_url = row["images.original_url"]
         continent = row["Continent"]
         scientific_name = row["scientific_name"]
+
+        if pd.isna(plant_id):
+            continue
 
         continent_id = get_continents(cursor)[continent]
 
