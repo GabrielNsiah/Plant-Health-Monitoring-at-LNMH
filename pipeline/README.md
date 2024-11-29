@@ -2,8 +2,8 @@
 
 [![Deployment Workflow](https://github.com/GabrielNsiah/Plant-Health-Monitoring-at-LNMH/actions/workflows/deployment.yml/badge.svg)](https://github.com/GabrielNsiah/Plant-Health-Monitoring-at-LNMH/actions/workflows/deployment.yml)
 
-![Pylint Score](.github/badges/pylint.svg)
-![Passing Tests](.github/badges/test.svg)
+![Pylint Score](../.github/badges/pylint.svg)
+![Passing Tests](../.github/badges/test.svg)
 
 ## Project Overview
 This pipeline makes retrieves data via a request to the Liverpool Museum of Natural History's Plant API, transforms the data into a more readable `.csv` file, cleans the data of erroneous values and loads it into an Relational Database Service hosted on AWS.
