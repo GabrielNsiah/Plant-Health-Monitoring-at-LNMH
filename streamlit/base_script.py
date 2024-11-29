@@ -107,3 +107,7 @@ def return_merged_df() -> pd.DataFrame:
     merged_df = merge_with_existing_recordings(rds_df)
 
     return merged_df
+
+
+if __name__ == "__main__":
+    print(return_merged_df())
