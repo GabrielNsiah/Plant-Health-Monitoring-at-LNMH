@@ -1,18 +1,21 @@
+"""Script for making streamlit dashboard."""
 from os import environ
-import streamlit as st
+from datetime import datetime
 import altair as alt
 import pandas as pd
-import pymssql
+import streamlit as st
 from base_script import return_merged_df
 from combined_trends import combined_trends_graph
+from continents import continents
 
 
-def load_data():
+def load_data() -> pd.DataFrame:
     """Load the dataset from the base script."""
     return return_merged_df()
 
 
-def filter_data(df, plant_id, start_time, end_time):
+def filter_data(df: pd.DataFrame, plant_id: int, start_time: datetime,
+                end_time: datetime) -> pd.DataFrame:
     """
     Filter the dataframe for the selected plant and time range, grouping by minute.
     """
@@ -33,7 +36,7 @@ def filter_data(df, plant_id, start_time, end_time):
     return average_readings
 
 
-def get_last_watered(df):
+def get_last_watered(df: pd.DataFrame) -> pd.DataFrame:
     """
     Get the last watered timestamp for each plant.
     """
@@ -47,14 +50,14 @@ def get_last_watered(df):
     return last_watered
 
 
-def prepare_data_for_chart(df):
+def prepare_data_for_chart(df: pd.DataFrame) -> pd.DataFrame:
     """
     Melt the dataframe for chart compatibility.
     """
     return df.melt(id_vars="minute", var_name="Measurement", value_name="Value")
 
 
-def create_chart(data):
+def create_chart(data: pd.DataFrame) -> alt.Chart:
     """
     Create a stacked bar chart for soil moisture and temperature.
     """
@@ -78,7 +81,7 @@ def create_chart(data):
     return chart
 
 
-def create_last_watered_chart(last_watered_data):
+def create_last_watered_chart(last_watered_data: pd.DataFrame) -> alt.Chart:
     """
     Create a bar chart for the last watered times for all plants.
     """
@@ -99,77 +102,7 @@ def create_last_watered_chart(last_watered_data):
     return chart
 
 
-def continents():
-    alt.data_transformers.disable_max_rows()
-
-    return_merged_df()
-
-    def get_connection() -> pymssql.Connection:
-        conn = pymssql.connect(
-            server=environ["DB_HOST"],
-            port=environ["DB_PORT"],
-            user=environ["DB_USER"],
-            password=environ["DB_PASSWORD"],
-            database=environ["DB_NAME"],
-            as_dict=True
-        )
-
-        return conn
-
-    connection = get_connection()
-    cursor = connection.cursor()
-    print("connected")
-    merged_df = return_merged_df()
-
-    def get_continent(cursor):
-        """Returns the continent of a given plant ID"""
-        cursor.execute("""
-            SELECT plants.plant_id, cont.continent_name 
-            FROM delta.Continents AS cont
-            JOIN delta.Locations AS loc
-            ON cont.continent_id = loc.continent_id
-            JOIN delta.Plants AS plants
-            ON plants.location_id = loc.location_id
-            ORDER BY plants.plant_id
-        """)
-
-        results = cursor.fetchall()
-        if results:
-            return results
-        else:
-            print("No results")
-            return None
-
-    continent_data = get_continent(cursor)
-
-    continent_df = pd.DataFrame(continent_data)
-
-    all_data = pd.merge(merged_df, continent_df, how="left", on=["plant_id"])
-
-    all_data["recording_taken"] = pd.to_datetime(all_data["recording_taken"])
-
-    all_data["recording_taken"] = all_data["recording_taken"].dt.floor("H")
-
-    grouped_df = all_data.groupby(["recording_taken", "continent_name"]).agg(
-        avg_soil_moisture=("soil_moisture", "mean")
-    ).reset_index()
-
-    print("Making Graph")
-
-    chart = alt.Chart(grouped_df).mark_line(point=True).encode(
-        x=alt.X("recording_taken:T", title="Time (Hour)"),
-        y=alt.Y("avg_soil_moisture:Q", title="Average Soil Moisture"),
-        color="continent_name:N",
-        tooltip=["reading_taken:T", "continent_name:N", "avg_soil_moisture:Q"]
-    ).properties(
-        title="Average Soil Moisture Per Continent Over Time",
-        width=800,
-        height=400
-    )
-    return chart
-
-
-def main():
+def main() -> None:
     """Main function to run the Streamlit app."""
     st.title("Plant Data Dashboard")
 
