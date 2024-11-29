@@ -76,11 +76,9 @@ def convert_data_to_df(recording_data: list[dict]) -> pd.DataFrame:
     return recordings_df
 
 
-def return_merged_df() -> pd.DataFrame:
-    """Returns the merged df, so that it can be used
-    in other dashboarding scripts."""
-    load_dotenv()
-
+def get_connection() -> pymssql.Connection:
+    """Creates and returns connection object
+    to RDS."""
     conn = pymssql.connect(
         server=environ["DB_HOST"],
         port=environ["DB_PORT"],
@@ -89,6 +87,16 @@ def return_merged_df() -> pd.DataFrame:
         database=environ["DB_NAME"],
         as_dict=True
     )
+
+    return conn
+
+
+def return_merged_df() -> pd.DataFrame:
+    """Returns the merged df, so that it can be used
+    in other dashboarding scripts."""
+    load_dotenv()
+
+    conn = get_connection()
 
     rds_data = query_database(conn)
     rds_df = convert_data_to_df(rds_data)
@@ -101,3 +109,7 @@ def return_merged_df() -> pd.DataFrame:
     merged_df = merge_with_existing_recordings(rds_df)
 
     return merged_df
+
+
+if __name__ == "__main__":
+    print(return_merged_df())

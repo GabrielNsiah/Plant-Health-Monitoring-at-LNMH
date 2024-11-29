@@ -80,15 +80,18 @@ def find_botanist_id(cursor, first_name, last_name, email, phone) -> int:
 
 def find_plant_id(cursor, plant_name: str,
                   scientific_name_id: int, location_id: int, image_url: str) -> int:
-    """Returns the botanist as shown in the database based on data given."""
+    """Returns the plant ID of the plant with the given info."""
     cursor.execute("""
             SELECT plant_id
             FROM delta.Plants
             WHERE plant_name = %s AND scientific_id = %s AND location_id = %s
                     AND image_url = %s;
         """, (plant_name, scientific_name_id, location_id, image_url))
+    try:
+        plant_id = cursor.fetchone()[0]
+    except TypeError:
+        plant_id = -1
 
-    plant_id = cursor.fetchone()[0]
     return plant_id
 
 
@@ -214,6 +217,9 @@ def insert_plants(cursor, plant_df: pd.DataFrame) -> None:
         continent = row["Continent"]
         scientific_name = row["scientific_name"]
 
+        if pd.isna(plant_id):
+            continue
+
         continent_id = get_continents(cursor)[continent]
 
         if pd.isna(row["scientific_name"]):
@@ -230,9 +236,8 @@ def insert_plants(cursor, plant_df: pd.DataFrame) -> None:
         cursor.execute("""
             SELECT COUNT(*)
             FROM delta.Plants
-            WHERE plant_id = %s AND plant_name = %s AND scientific_id = %s AND location_id = %s
-                    AND image_url = %s;
-        """, (plant_id, plant_name, scientific_name_id, location_id, image_url))
+            WHERE plant_id = %s;
+        """, (plant_id))
 
         count = cursor.fetchone()[0]
 
@@ -331,6 +336,9 @@ def insert_assignments(cursor, plant_df: pd.DataFrame) -> None:
             cursor, row, continent_id)
         plant_id = find_plant_id(
             cursor, plant_data["plant_name"], scientific_name_id, location_id, plant_data["image_url"])
+
+        if plant_id == -1:
+            continue
 
         cursor.execute("""
                     SELECT COUNT(*)
