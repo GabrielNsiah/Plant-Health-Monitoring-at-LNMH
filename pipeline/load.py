@@ -214,6 +214,9 @@ def insert_plants(cursor, plant_df: pd.DataFrame) -> None:
         continent = row["Continent"]
         scientific_name = row["scientific_name"]
 
+        if pd.isna(plant_id):
+            continue
+
         continent_id = get_continents(cursor)[continent]
 
         if pd.isna(row["scientific_name"]):
