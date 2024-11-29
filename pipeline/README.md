@@ -1,24 +1,33 @@
-# Database
+# ETL Pipeline
+
+[![Deployment Workflow](https://github.com/GabrielNsiah/Plant-Health-Monitoring-at-LNMH/actions/workflows/deployment.yml/badge.svg)](https://github.com/GabrielNsiah/Plant-Health-Monitoring-at-LNMH/actions/workflows/deployment.yml)
+
+![Pylint Score](.github/badges/pylint.svg)
+![Passing Tests](.github/badges/test.svg)
 
 ## Project Overview
-The files in this folder are responsible for a multitude of things to do with the database:
-- `schema.sql` - The schema for the database.
-- `lambda_mover.py` - The code for moving old data from the database into the S3 bucket.
-- `reset_db.py` - Code for resetting the database, removes all entries.
+This pipeline makes retrieves data via a request to the Liverpool Museum of Natural History's Plant API, transforms the data into a more readable `.csv` file, cleans the data of erroneous values and loads it into an Relational Database Service hosted on AWS.
 
-The database follows the below Entity-Relationship Diagram
-![Entity Relationship Diagram](../architecture/ERD_diagram.png)
+Each step of the pipeline is available as a standalone python file:
+- `extract.py`
+- `transform.py`
+- `load.py`
+
+There is also a file to run all the above scripts in sequence:
+- `etl.py`
 ---
 
 ## Features
-- Moves data older than 24 hours into an S3 bucket.
-- Able to reset the state of the database
+- Extract data from the Liverpool Museum of Natural History's Plant API
+- Transform data into a `.csv` file.
+- Load transformed data into an RDS hosted on Amazon Web Services.
+- Logging is built in.
 
 ## Prerequisites
 
-Before running files in the folder, ensure the following dependencies are installed:
+Before running the pipeline, ensure the following dependencies are installed:
 
-- `python3.9` - For compatability with `pymmsql`
+- `python3.9` - For compatibility with `pymmsql`
 - `pytest` - For running tests
 - `pylint` - For linting the code
 - `requests` - For making HTTP requests
@@ -27,8 +36,8 @@ Before running files in the folder, ensure the following dependencies are instal
 - `python-dotenv` - For loading environment variables from a `.env` file
 - `pymssql` - For connecting to Microsoft SQL Server
 - `boto3` - For interacting with AWS services
-- `altair` - For creating the visualizations
-- `streamlit` - For hosting the visualisations
+- `altair` - For creating interactive visualizations
+- `streamlit` - For building and deploying web apps
 
 
 ## Environment Variables
