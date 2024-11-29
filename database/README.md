@@ -27,8 +27,8 @@ Before running files in the folder, ensure the following dependencies are instal
 - `python-dotenv` - For loading environment variables from a `.env` file
 - `pymssql` - For connecting to Microsoft SQL Server
 - `boto3` - For interacting with AWS services
-- `altair` - For creating interactive visualizations
-- `streamlit` - For building and deploying web apps
+- `altair` - For creating the visualizations
+- `streamlit` - For hosting the visualisations
 
 
 ## Environment Variables
