@@ -34,6 +34,18 @@ Before running the pipeline, ensure the following dependencies are installed:
 - `altair` - For creating interactive visualizations
 - `streamlit` - For building and deploying web apps
 
+
+## Environment Variables
+
+To connect to the Microsoft SQL Server, you'll need to set up the following environment variables in your `.env` file:
+
+- `DB_HOST` – The hostname or IP address of your SQL Server.
+- `DB_PORT` – The port number for your SQL Server (default is typically `1433`).
+- `DB_USER` – The username used to authenticate to your SQL Server.
+- `DB_PASSWORD` – The password associated with the `DB_USER`.
+- `DB_NAME` – The name of the database you want to connect to.
+- `SCHEMA_NAME` – The name of the schema you want to work with in the database.
+
 ### Installation
 
 To install the required dependencies, run:
