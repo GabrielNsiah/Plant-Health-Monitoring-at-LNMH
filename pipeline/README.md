@@ -8,7 +8,7 @@ Each step of the pipeline is available as a standalone python file:
 - `transform.py`
 - `load.py`
 
-There is also a file to run the entire pipeline in sequence:
+There is also a file to run all the above scripts in sequence:
 - `etl.py`
 ---
 
@@ -47,10 +47,17 @@ To connect to the Microsoft SQL Server, you'll need to set up the following envi
 - `SCHEMA_NAME` – The name of the schema you want to work with in the database.
 
 ### Installation
-
+Enter a virtual environment with:
+```bash
+python -m venv .venv
+```
+Enter the virtual environment with:
+```bash
+source .venv/bin/activate
+```
 To install the required dependencies, run:
-
 ```bash
 pip install -r requirements.txt
+```
 
 
