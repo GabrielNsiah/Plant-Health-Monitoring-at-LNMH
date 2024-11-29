@@ -87,8 +87,11 @@ def find_plant_id(cursor, plant_name: str,
             WHERE plant_name = %s AND scientific_id = %s AND location_id = %s
                     AND image_url = %s;
         """, (plant_name, scientific_name_id, location_id, image_url))
+    try:
+        plant_id = cursor.fetchone()[0]
+    except TypeError:
+        plant_id = -1
 
-    plant_id = cursor.fetchone()[0]
     return plant_id
 
 
@@ -333,6 +336,9 @@ def insert_assignments(cursor, plant_df: pd.DataFrame) -> None:
             cursor, row, continent_id)
         plant_id = find_plant_id(
             cursor, plant_data["plant_name"], scientific_name_id, location_id, plant_data["image_url"])
+
+        if plant_id == -1:
+            continue
 
         cursor.execute("""
                     SELECT COUNT(*)
