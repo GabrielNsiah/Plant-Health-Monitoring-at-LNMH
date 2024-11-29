@@ -1,6 +1,6 @@
 # pylint: disable=redefined-outer-name, no-member
 """Base script for making merged dataframe from short
-and long-term AWS storages."""
+and long-term AWS storages, used for streamlit dashboard."""
 
 from os import environ
 from datetime import datetime
@@ -76,7 +76,9 @@ def convert_data_to_df(recording_data: list[dict]) -> pd.DataFrame:
     return recordings_df
 
 
-if __name__ == "__main__":
+def return_merged_df() -> pd.DataFrame:
+    """Returns the merged df, so that it can be used
+    in other dashboarding scripts."""
     load_dotenv()
 
     conn = pymssql.connect(
@@ -98,4 +100,4 @@ if __name__ == "__main__":
 
     merged_df = merge_with_existing_recordings(rds_df)
 
-    print(merged_df)
+    return merged_df
