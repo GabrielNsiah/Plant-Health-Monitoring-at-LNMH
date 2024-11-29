@@ -19,7 +19,7 @@ def filter_data(df, plant_id, start_time, end_time):
         (df["plant_id"] == plant_id)
         & (df["recording_taken"] >= start_time)
         & (df["recording_taken"] <= end_time)
-    ].copy()  # Explicitly create a copy to avoid the warning
+    ].copy()
     filtered_df["minute"] = filtered_df["recording_taken"].dt.strftime(
         "%Y-%m-%d %H:%M")
     average_readings = (
