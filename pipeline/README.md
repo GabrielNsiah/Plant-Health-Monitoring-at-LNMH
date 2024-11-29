@@ -27,7 +27,7 @@ There is also a file to run all the above scripts in sequence:
 
 Before running the pipeline, ensure the following dependencies are installed:
 
-- `python3.9` - For compatability with `pymmsql`
+- `python3.9` - For compatibility with `pymmsql`
 - `pytest` - For running tests
 - `pylint` - For linting the code
 - `requests` - For making HTTP requests
