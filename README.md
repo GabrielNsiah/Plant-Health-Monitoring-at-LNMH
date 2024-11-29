@@ -8,7 +8,7 @@ The solution to this issue we have proposed is an ETL pipeline, connected to vis
 This allows for:
 
 - Data to automatically be extracted, transformed and loaded into a database in the cloud.
-- DAta older than 24 hours to be moved into a longer-term storage option for lower costs.
+- Data older than 24 hours to be moved into a longer-term storage option for lower costs.
 - Real time, filterable visualizations, accessible by staff at any time.
 
 ## Diagrams
