@@ -1,11 +1,17 @@
-from base_script import return_merged_df
-import altair as alt
+# pylint: disable=no-member
+"""Script for creating and returning
+continents line chart to be used on streamlit dash."""
+
 from os import environ
+import altair as alt
 import pandas as pd
 import pymssql
+from base_script import return_merged_df
 
 
-def continents():
+def continents() -> alt.Chart:
+    """Creates and returns the continents chart
+    to be used on the streamlit dashboard."""
     alt.data_transformers.disable_max_rows()
 
     return_merged_df()
@@ -72,3 +78,5 @@ def continents():
         width=800,
         height=400
     )
+
+    return chart

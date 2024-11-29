@@ -77,6 +77,8 @@ def convert_data_to_df(recording_data: list[dict]) -> pd.DataFrame:
 
 
 def get_connection() -> pymssql.Connection:
+    """Creates and returns connection object
+    to RDS."""
     conn = pymssql.connect(
         server=environ["DB_HOST"],
         port=environ["DB_PORT"],
