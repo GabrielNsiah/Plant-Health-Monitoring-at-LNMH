@@ -230,9 +230,8 @@ def insert_plants(cursor, plant_df: pd.DataFrame) -> None:
         cursor.execute("""
             SELECT COUNT(*)
             FROM delta.Plants
-            WHERE plant_id = %s AND plant_name = %s AND scientific_id = %s AND location_id = %s
-                    AND image_url = %s;
-        """, (plant_id, plant_name, scientific_name_id, location_id, image_url))
+            WHERE plant_id = %s;
+        """, (plant_id))
 
         count = cursor.fetchone()[0]
 

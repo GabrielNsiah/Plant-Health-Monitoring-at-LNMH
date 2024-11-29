@@ -5,3 +5,6 @@ pandas
 pytest-cov
 python-dotenv
 pymssql
+boto3
+altair
+streamlit
