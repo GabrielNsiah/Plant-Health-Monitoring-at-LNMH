@@ -42,9 +42,5 @@ To connect to the Microsoft SQL Server, you'll need to set up the following envi
 - `DB_NAME` – The name of the database you want to connect to.
 - `SCHEMA_NAME` – The name of the schema you want to work with in the database.
 
-[![Deployment Workflow](https://github.com/GabrielNsiah/Plant-Health-Monitoring-at-LNMH/actions/workflows/deployment.yml/badge.svg)](https://github.com/GabrielNsiah/Plant-Health-Monitoring-at-LNMH/actions/workflows/deployment.yml)
-
-![Pylint Score](.github/badges/pylint.svg)
-![Passing Tests](.github/badges/test.svg)
 
 
