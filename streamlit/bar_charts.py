@@ -4,6 +4,7 @@ import altair as alt
 import pandas as pd
 import pymssql
 from base_script import return_merged_df
+from combined_trends import combined_trends_graph
 
 
 def load_data():
@@ -205,6 +206,9 @@ def main():
 
     continents_chart = continents()
     st.altair_chart(continents_chart, use_container_width=True)
+
+    combined_trends_chart = combined_trends_graph()
+    st.altair_chart(combined_trends_chart, use_container_width=True)
 
 
 if __name__ == "__main__":
